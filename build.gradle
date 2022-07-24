@@ -10,12 +10,6 @@ group = 'com.dburyak.sandbox'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
 repositories {
     mavenLocal()
     mavenCentral()
@@ -24,6 +18,18 @@ repositories {
 
 ext {
     set('testcontainersVersion', "1.17.3")
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
+    }
 }
 
 dependencies {
@@ -36,8 +42,6 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
-    // spring native
-
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
@@ -49,19 +53,13 @@ dependencies {
     testImplementation 'org.testcontainers:postgresql'
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
-    }
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
-tasks.named('bootBuildImage') {
+bootBuildImage {
     builder = 'paketobuildpacks/builder:tiny'
     environment = ['BP_NATIVE_IMAGE': 'true']
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
 }
 
 hibernate {
